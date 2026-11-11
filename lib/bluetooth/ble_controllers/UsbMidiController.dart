@@ -82,17 +82,22 @@ class UsbMidiController extends BLEController {
   }
 
   Future<void> _refreshDevices() async {
-    final devices = await _midi.devices ?? <MidiDevice>[];
-    final nuxDevices = devices
-        .where((device) =>
-            device.name.toUpperCase().contains('NUX') ||
-            device.name.toUpperCase().contains('NMP-03'))
-        .map((device) => UsbMidiScanResult(device))
-        .toList();
+    setScanningStatus(true);
+    try {
+      final devices = await _midi.devices ?? <MidiDevice>[];
+      // This Linux build currently targets the NUX Mighty Plug Pro (NMP-03).
+      // Do not accidentally connect to another USB MIDI interface.
+      final nuxDevices = devices
+          .where((device) => device.name.toUpperCase().contains('NMP-03'))
+          .map((device) => UsbMidiScanResult(device))
+          .toList();
 
-    onScanResults(nuxDevices, <BLEScanResult>[]);
-    if (nuxDevices.isNotEmpty) {
-      setMidiSetupStatus(MidiSetupStatus.deviceFound);
+      onScanResults(nuxDevices, <BLEScanResult>[]);
+      if (nuxDevices.isNotEmpty) {
+        setMidiSetupStatus(MidiSetupStatus.deviceFound);
+      }
+    } finally {
+      setScanningStatus(false);
     }
   }
 
