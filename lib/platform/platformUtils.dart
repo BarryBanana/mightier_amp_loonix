@@ -21,6 +21,8 @@ class PlatformUtils {
       return getExternalStorageDirectory();
     } else if (PlatformUtils.isIOS) {
       return getApplicationDocumentsDirectory();
+    } else if (PlatformUtils.isLinux) {
+      return getApplicationSupportDirectory();
     }
     return Future.error("getAppDataDirectory(): Platform not supported");
   }
