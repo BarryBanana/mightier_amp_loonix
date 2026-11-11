@@ -27,7 +27,6 @@ flutter:
     platforms:
       linux:
         dartPluginClass: FlutterMidiCommandLinux
-        pluginClass: none
 
 ffigen:
   name: 'ALSA'
