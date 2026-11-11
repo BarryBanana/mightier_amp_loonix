@@ -56,6 +56,7 @@ void _rxIsolate(Tuple2<SendPort, int> args) {
 
   int status = 0;
   int msgLength = 0;
+  bool inSysEx = false;
   Pointer<Uint8> buffer = calloc<Uint8>();
   List<int> rxBuffer = [];
 
@@ -68,16 +69,33 @@ void _rxIsolate(Tuple2<SendPort, int> args) {
     if ((status = alsa.snd_rawmidi_read(inPort, buffer.cast(), 1)) < 0) {
       print("Problem reading MIDI input:${FlutterMidiCommandLinux.stringFromNative(alsa.snd_strerror(status))}");
     } else {
-      // print("byte ${buffer.value}");
-      if (rxBuffer.length == 0) {
-        msgLength = lengthOfMessageType(buffer.value);
+      final byte = buffer.value;
+
+      // SysEx messages have variable length. Keep the complete message,
+      // including F0 and F7, and emit it only when the terminator arrives.
+      if (rxBuffer.isEmpty) {
+        inSysEx = byte == 0xF0;
+        msgLength = inSysEx ? 0 : lengthOfMessageType(byte);
       }
 
-      rxBuffer.add(buffer.value);
-
-      if (rxBuffer.length == msgLength) {
-        // print("send buffer $rxBuffer $msgLength");
-        sendPort.send(Uint8List.fromList(rxBuffer));
+      if (inSysEx) {
+        rxBuffer.add(byte);
+        if (byte == 0xF7) {
+          sendPort.send(Uint8List.fromList(rxBuffer));
+          rxBuffer.clear();
+          inSysEx = false;
+          msgLength = 0;
+        }
+      } else if (msgLength > 0) {
+        rxBuffer.add(byte);
+        if (rxBuffer.length == msgLength) {
+          sendPort.send(Uint8List.fromList(rxBuffer));
+          rxBuffer.clear();
+          msgLength = 0;
+        }
+      } else {
+        // Ignore unsupported/system-common bytes rather than leaving the
+        // receive buffer stuck waiting for a zero-length message.
         rxBuffer.clear();
       }
     }
