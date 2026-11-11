@@ -12,6 +12,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../platform/platformUtils.dart';
 import 'ble_controllers/BLEController.dart';
 import 'ble_controllers/WebBleController.dart';
+import 'ble_controllers/UsbMidiController.dart';
 
 typedef BluetoothErrorCallback = void Function(BleError, dynamic data);
 
@@ -71,7 +72,7 @@ class BLEMidiHandler {
     } else if (PlatformUtils.isWindows) {
       bleController = DummyBLEController(forcedDevices);
     } else if (PlatformUtils.isLinux) {
-      bleController = DummyBLEController(forcedDevices);
+      bleController = UsbMidiController(forcedDevices);
     } else {
       bleController = DummyBLEController(forcedDevices);
     }
