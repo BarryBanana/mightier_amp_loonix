@@ -92,7 +92,7 @@ class NuxMightyPlugPro extends NuxReorderableDevice<PlugProPreset>
   @override
   String get productIconLabel => "MP-3|-|SPACE";
   @override
-  List<String> get productBLENames => ["MIGHTY PLUG PRO"];
+  List<String> get productBLENames => ["MIGHTY PLUG PRO", "NUX NMP-03"];
 
   @override
   int get channelsCount => 7;
