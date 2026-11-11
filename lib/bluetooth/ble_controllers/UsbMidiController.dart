@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter_midi_command/flutter_midi_command.dart';
 
 import 'BLEController.dart';
+import '../devices/NuxConstants.dart';
 
 /// BLEController-compatible transport backed by the Linux ALSA USB MIDI API.
 /// The existing device protocol code uses BLE-MIDI timestamp framing, so this
